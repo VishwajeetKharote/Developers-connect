@@ -3,7 +3,10 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const gravatar = require('gravatar');
 const bycrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const passport = require('passport');
 const User = require('../../models/User');
+const jwtKey = require('../../config/keys').secretOrPrivateKey;
 
 // @route GET/api/users/test
 // @desc testing route
@@ -67,8 +70,14 @@ router.get('/login',(req,res)=>{
             bycrypt.compare(req.body.password, user.password)
                 .then(isMatch=>{
                     if(isMatch){
-                        console.log(isMatch);
-                        res.json({msg:'User logged in'})
+                        // generate JWT token
+                        const payload = {id:user._id,name: user.name, email:user.email, avatar:user.avatar};
+                        jwt.sign(payload, jwtKey, {expiresIn: 3600}, (err,token)=>{
+                            res.json({
+                                success: true,
+                                token : 'Bearer '+token
+                            });
+                        });
                     }
                     else{
                         console.log(isMatch);
@@ -78,6 +87,12 @@ router.get('/login',(req,res)=>{
         })
 });
 
+// @route GET/api/users/current
+// @desc Get current logged in user
+// @access private
+router.get('/current', passport.authenticate('jwt', {session:false}), (req,res)=>{
+    res.send(req.user);
+});
 
 
  module.exports = router;
