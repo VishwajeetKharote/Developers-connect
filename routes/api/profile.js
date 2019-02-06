@@ -3,10 +3,11 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-
+const ValidateProfileFields = require('../../validation/profile');
 // load neccessary models
 const User = require('../../models/User');
 const Profile = require('../../models/Profile');
+
 
 
 router.get('/', passport.authenticate('jwt',{session:false}), (req,res)=>{
@@ -25,9 +26,12 @@ router.get('/', passport.authenticate('jwt',{session:false}), (req,res)=>{
 });
 
 router.post('/', passport.authenticate('jwt', {session:false}),(req,res)=>{
-    let errors = {};
     const fields = {};
-    console.log('Inside psot route');
+    const {errors, isValid} = ValidateProfileFields(req.body);
+    if(!isValid){
+        return res.status(400).send(errors);
+    }
+   console.log(req.user.id);
     fields.user = req.user.id;
     if(req.body.handle) fields.handle = req.body.handle;
     if(req.body.company) fields.company = req.body.company;
