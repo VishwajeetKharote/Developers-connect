@@ -8,6 +8,11 @@ const passport = require('passport');
 const User = require('../../models/User');
 const jwtKey = require('../../config/keys').secretOrPrivateKey;
 
+// Importing Validation functions
+const ValidateRegisterInput = require('../../validation/register');
+const ValidateLoginInput = require('../../validation/login');
+
+
 // @route GET/api/users/test
 // @desc testing route
 // @access public 
@@ -21,10 +26,15 @@ router.get('/test', (req,res)=>{
 // @desc register a new user
 // @access public
 router.post('/register', (req,res)=>{
+    const {errors, isValid } = ValidateRegisterInput(req.body);
+    if(!isValid){
+        return res.status(400).json(errors);
+    }
     User.findOne({email:req.body.email})
         .then(user=>{
             if(user){
-                return res.status(400).json({'msg':'user already exists'});
+                errors.email = 'user already exists';
+                return res.status(400).json({errors});
             }
             else{
                 const avatar = gravatar.url(req.body.email, {
@@ -62,10 +72,18 @@ router.post('/register', (req,res)=>{
 // @desc Return JWT token after successful login 
 // @access public
 router.get('/login',(req,res)=>{
+
+    const {errors, isValid} = ValidateLoginInput(req.body);
+    if(!isValid){
+        return res.status(400).json(errors);
+    }
     User.findOne({email:req.body.email})
         .then(user=>{
+            console.log(user.password);
+            console.log(req.body.password);
             if(!user){
-                res.status(400).send({'msg':'Account does not exist'});
+                errors.email = 'Account does not exist';
+                return res.status(400).json(errors);
             }
             bycrypt.compare(req.body.password, user.password)
                 .then(isMatch=>{
@@ -80,8 +98,9 @@ router.get('/login',(req,res)=>{
                         });
                     }
                     else{
-                        console.log(isMatch);
-                        return res.status(400).json({msg:'failed login'});
+                        //console.log(isMatch);
+                        errors.password = 'Incorrect login credentials'
+                        return res.status(400).json(errors);
                     }
                 })
         })
