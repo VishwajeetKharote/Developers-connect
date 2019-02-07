@@ -11,7 +11,7 @@ const jwtKey = require('../../config/keys').secretOrPrivateKey;
 // Importing Validation functions
 const ValidateRegisterInput = require('../../validation/register');
 const ValidateLoginInput = require('../../validation/login');
-
+const Profile = require('../../models/Profile');
 
 // @route GET/api/users/test
 // @desc testing route
@@ -79,8 +79,6 @@ router.get('/login',(req,res)=>{
     }
     User.findOne({email:req.body.email})
         .then(user=>{
-            console.log(user.password);
-            console.log(req.body.password);
             if(!user){
                 errors.email = 'Account does not exist';
                 return res.status(400).json(errors);
@@ -111,6 +109,29 @@ router.get('/login',(req,res)=>{
 // @access private
 router.get('/current', passport.authenticate('jwt', {session:false}), (req,res)=>{
     res.send(req.user);
+});
+
+// @route DELETE api/users/
+// @desc delete the user 
+// @access private
+router.delete('/', passport.authenticate('jwt', {session:false}),(req,res)=>{
+    User.findOne({_id:req.user.id})
+        .then(user=>{
+            // get the profile if exists
+            Profile.findOne({user:user.id}).then(
+                profile=>{
+                    if(profile){
+                        Profile.findByIdAndRemove(profile.id).then(()=>{
+                            console.log('success')
+                        })
+                    }
+                }
+            ).catch(err=>console.log(err));
+            User.findByIdAndDelete(user.id).then(()=>{
+                res.send({msg:'Deleted the profile'})
+            }).catch(err=>console.log(err))
+
+        }).catch(err=>console.log(err))
 });
 
 
