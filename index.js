@@ -6,6 +6,7 @@ const passport = require('passport');
 const db = require('./config/keys').mongoURI;
 const users = require('./routes/api/users');
 const profile = require('./routes/api/profile');
+const posts = require('./routes/api/posts');
 // connecting to mongoDB
 mongoose.connect(db)
         .then(()=>console.log('Successfully connected to db'))
@@ -18,7 +19,8 @@ require('./config/passport')(passport);
 
 // defining routes
 app.use('/api/users', users);
-app.use('/api/profile', profile)
+app.use('/api/profile', profile);
+app.use('/api/posts', posts);
 
 const port = process.env.port || 5000;
 app.listen(port, ()=>console.log( `server running on port ${port}`));
