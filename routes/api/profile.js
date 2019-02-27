@@ -37,6 +37,7 @@ router.get('/', passport.authenticate('jwt',{session:false}), (req,res)=>{
 // @access public
 router.get('/all',(req,res)=>{
     let errors = {};
+    console.log("Profile all route");
     Profile.find()
     .populate('users',['name','avatar'])
     .then(profiles =>{
@@ -44,7 +45,7 @@ router.get('/all',(req,res)=>{
             errors.noprofiles = 'No profiles currently'
             return res.status(404).json(errors);
         }
-        res.json(errors);
+        res.json(profiles);
     }).catch(err=>res.status(400).json(err))
 });
 
