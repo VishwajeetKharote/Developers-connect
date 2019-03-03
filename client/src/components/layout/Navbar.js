@@ -26,7 +26,7 @@ class Navbar extends Component {
               </li>
             </ul>
 
-            <ul className="navbar-nav ml-auto">
+            <ul className="navbar-nav ml-auto ">
               <li className="nav-item">
                 <Link className="nav-link" to="/register">
                   Sign up

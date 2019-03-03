@@ -2,7 +2,7 @@ import React from 'react';
 
 function Footer() {
   return (
-    <footer className="bg-dark mt-5 p-3 text-center text-white">
+    <footer className="bg-dark mt-5 p-3 text-center text-white fixed-bottom">
       Copyright &copy; 2018 Spartans
     </footer>
   );
